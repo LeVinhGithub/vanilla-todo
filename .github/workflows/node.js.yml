@@ -1,0 +1,65 @@
+# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Run e2e CI
+
+on:
+  schedule:
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+
+jobs:
+  rune2e:
+    name: Run e2e
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [14.x]
+        suite: [tabledef, apis, dash]
+    
+
+    steps:
+    - uses: browser-actions/setup-chrome@latest
+    - run: chrome --version 94.0.4606.81
+    - name: Checkout other repo
+      uses: actions/checkout@v2
+      with:
+        repository: LeVinhGithub/test-github-action
+    - name: Set up node ${{ matrix.suite }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm install
+    - name: Run e2e with suite ${{ matrix.suite }}
+      run: npm run test:${{ matrix.suite }}
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.2.4
+      if: always()
+      with:
+        # Artifact name
+        name: Allure-report
+        # A file, directory or wildcard pattern that describes what to upload
+        path: allure-results
+        if-no-files-found: error
+        retention-days: 90
+  slack:
+
+    name: Slack Notification
+    if: ${{ always() }}
+    needs: rune2e
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Slack Notification
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_CHANNEL: e2e-test
+        SLACK_COLOR: '#ff9999'
+        SLACK_ICON: https://github.com/rtCamp.png?size=48
+        SLACK_MESSAGE: 'Finish e2e run. Please check the result'
+        SLACK_TITLE: Title
+        SLACK_USERNAME: e2eBOT
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
