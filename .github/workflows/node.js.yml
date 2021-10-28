@@ -22,7 +22,7 @@ jobs:
 
     steps:
     - uses: browser-actions/setup-chrome@latest
-    - run: chrome --version 95.0.4638.54
+    - run: chrome --version
     - name: Checkout other repo
       uses: actions/checkout@v2
       with:
