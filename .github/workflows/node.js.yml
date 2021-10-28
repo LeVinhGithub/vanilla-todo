@@ -26,7 +26,7 @@ jobs:
     - name: Checkout other repo
       uses: actions/checkout@v2
       with:
-        repository: LeVinhGithub/test-github-action
+        repository: LeVinhGithub/jitera_e2e
         token: ${{ secrets.PAT }}
     - name: Set up node ${{ matrix.suite }}
       uses: actions/setup-node@v2
