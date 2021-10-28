@@ -27,6 +27,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: LeVinhGithub/jitera_e2e
+        ref: develop
         token: ${{ secrets.PAT }}
     - name: Set up node ${{ matrix.suite }}
       uses: actions/setup-node@v2
